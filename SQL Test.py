@@ -1,5 +1,6 @@
 import openai
 import sqlite3
+import re
 
 # SQLite Database File
 DB_FILE = "memories.db"
@@ -24,7 +25,7 @@ def get_api_key():
         print("❌ Error retrieving API key:", e)
         return None  # Handle errors gracefully
 
-# Function to fetch relevant memory from SQLite
+# Function to fetch all stored memories from SQLite
 def fetch_memory_from_db():
     try:
         conn = sqlite3.connect(DB_FILE)
@@ -49,7 +50,33 @@ def fetch_memory_from_db():
         print("SQL Error:", e)
         return "Memory lookup failed."
 
-# Function to get AI response with the retrieved context
+# Function to save a new memory into the database
+def save_memory_to_db(memory_text):
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+
+        # Insert the new memory
+        cursor.execute("INSERT INTO memories (memory_text) VALUES (?)", (memory_text,))
+        conn.commit()
+        conn.close()
+
+        print(f"✅ Memory saved: {memory_text}")
+        return "✅ I have remembered that."
+
+    except Exception as e:
+        print("❌ Error saving memory:", e)
+        return "❌ I couldn't save that memory."
+
+# Function to check if the user wants to save a memory
+def detect_and_save_memory(user_input):
+    match = re.match(r"remember this[:\-]?\s*(.*)", user_input, re.IGNORECASE)
+    if match:
+        memory_text = match.group(1).strip()
+        return save_memory_to_db(memory_text)
+    return None
+
+# Function to get AI response with memory context
 def get_ai_response(user_input):
     openai_api_key = get_api_key()  # Retrieve the API key from DB
     if not openai_api_key:
@@ -57,7 +84,13 @@ def get_ai_response(user_input):
 
     client = openai.OpenAI(api_key=openai_api_key)  # Use the retrieved key
 
-    memory_context = fetch_memory_from_db()  # Fetch all stored memories
+    # Check if the user wants to save a memory
+    memory_save_response = detect_and_save_memory(user_input)
+    if memory_save_response:
+        return memory_save_response  # Return confirmation message instead of AI response
+
+    # Fetch all stored memories
+    memory_context = fetch_memory_from_db()
 
     # Debugging: Print what system content is being sent
     system_message = f"Here are some predefined memories: {memory_context}"
