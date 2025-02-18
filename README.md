@@ -32,8 +32,8 @@ This repository contains a Slack bot built with [Slack Bolt](https://slack.dev/b
 ### 1. Clone the Repository:
 
 ```bash
-git clone https://github.com/yourusername/slack-ai-assistant.git
-cd slack-ai-assistant
+git clone https://github.com/Sgt.Dicks/openai.git
+cd openai
 ```
 
 ### 2. Create a Virtual Environment (optional but recommended):
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS conversation_history (
 INSERT INTO api_keys (service, api_key) VALUES ('openai', 'your_openai_api_key_here');
 ```
 
-### 7. Configure Your Network Drive (Optional):
+### 7. Configure Your Network Drive (NOT FULLY IMPLAMENTED):
 
 If you plan to use the `!howto <task>` command, ensure your network drive is mounted (e.g., as `Z:/instructions/`) or adjust the file path in the code accordingly.
 
